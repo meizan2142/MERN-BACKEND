@@ -1,5 +1,6 @@
 const express = require('express')
 const cors = require('cors')
+const jwt = require('jsonwebtoken');
 require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 4000;
@@ -29,6 +30,24 @@ async function run() {
     try {
         client.connect();
         console.log('Database connected successfully');
+        // Collection
+        const userCollection = client.db('Ecommerce').collection('newUser')
+        // API ROUTES
+        // User related
+        app.get('/newuser', async (req, res) => {
+            const result = await userCollection.find().toArray()
+            res.send(result)
+        })
+        app.post('/newuser', async (req, res) => {
+            const newUsers = req.body;
+            const query = { email: newUsers.email }
+            const existingUser = await userCollection.findOne(query)
+            if (existingUser) {
+                return res.send({ message: 'User Already exists', insertedId: null })
+            }
+            const result = await userCollection.insertOne(newUsers);
+            res.send(result)
+        });
     } finally {
     }
 }
@@ -39,6 +58,15 @@ run().catch(console.dir);
 // app
 app.get('/', (req, res) => {
     res.send('The Final Run Assignment server is running')
+})
+
+// jwt 
+app.post('/authentication', async(req, res) => {
+    const userEmail = req.body
+    const token = jwt.sign(userEmail, process.env.ACCESS_KEY_TOKEN, {
+        expiresIn: "7d"
+    });
+    res.send({token})
 })
 
 app.listen(port, () => {
