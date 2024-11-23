@@ -5,6 +5,11 @@ require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 4000;
 
+const corsOptions = {
+    origin: ['http://localhost:5173', 'https://mern-web-59f53.web.app'],
+    credentials: true,
+    optionSuccessStatus: 200
+}
 
 // Middlware
 app.use(cors())
@@ -48,6 +53,12 @@ async function run() {
             const result = await userCollection.insertOne(user);
             res.send(result)
         });
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const result = await userCollection.findOne(query)
+            res.send(result)
+        })
     } finally {
     }
 }
@@ -61,12 +72,12 @@ app.get('/', (req, res) => {
 })
 
 // jwt 
-app.post('/authentication', async(req, res) => {
+app.post('/authentication', async (req, res) => {
     const userEmail = req.body
     const token = jwt.sign(userEmail, process.env.ACCESS_KEY_TOKEN, {
         expiresIn: "10d"
     });
-    res.send({token})
+    res.send({ token })
 })
 
 app.listen(port, () => {
