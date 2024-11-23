@@ -34,18 +34,18 @@ async function run() {
         const userCollection = client.db('Ecommerce').collection('newUser')
         // API ROUTES
         // User related
-        app.get('/newuser', async (req, res) => {
+        app.get('/users', async (req, res) => {
             const result = await userCollection.find().toArray()
             res.send(result)
         })
-        app.post('/newuser', async (req, res) => {
-            const newUsers = req.body;
-            const query = { email: newUsers.email }
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const query = { email: user.email }
             const existingUser = await userCollection.findOne(query)
             if (existingUser) {
-                return res.send({ message: 'User Already exists', insertedId: null })
+                return res.send({ message: 'User Already exists' })
             }
-            const result = await userCollection.insertOne(newUsers);
+            const result = await userCollection.insertOne(user);
             res.send(result)
         });
     } finally {
@@ -64,7 +64,7 @@ app.get('/', (req, res) => {
 app.post('/authentication', async(req, res) => {
     const userEmail = req.body
     const token = jwt.sign(userEmail, process.env.ACCESS_KEY_TOKEN, {
-        expiresIn: "10s"
+        expiresIn: "10d"
     });
     res.send({token})
 })
