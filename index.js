@@ -64,7 +64,7 @@ app.get('/', (req, res) => {
 app.post('/authentication', async(req, res) => {
     const userEmail = req.body
     const token = jwt.sign(userEmail, process.env.ACCESS_KEY_TOKEN, {
-        expiresIn: "7d"
+        expiresIn: "10s"
     });
     res.send({token})
 })
